@@ -137,7 +137,7 @@ let%expect_test "place" =
     {|
     (Place
      ((rid 1) (deadline_ms 10000)
-      (game ((id g_8f3a) (index 1) (total 100) (first you)))
+      (game ((id g_8f3a) (index 1) (total 100) (first (you))))
       (opponent ((name Alex) (program (((name x) (version 1)))))) (strikes 0)
       (error ())))
     |}];
@@ -253,7 +253,7 @@ let%expect_test "turn" =
     {|
     (Turn
      ((rid 7) (deadline_ms 10000)
-      (game ((id g_8f3a) (index 1) (total 100) (first you)))
+      (game ((id g_8f3a) (index 1) (total 100) (first (you))))
       (you
        ((S S S S S Empty Empty Empty Empty Empty)
         (Empty Miss Empty Empty Empty Empty Empty Empty Empty Empty)
@@ -384,7 +384,7 @@ let%expect_test "game_over" =
   [%expect
     {|
     (Game_over
-     ((game ((id g_8f3a) (index 1) (total 100) (first you))) (winner you)
+     ((game ((id g_8f3a) (index 1) (total 100) (first (you)))) (winner you)
       (reason sunk) (last_shot (((x 6) (y 6) (result (Sunk 2))))) (incoming ())
       (series
        (Object
@@ -495,7 +495,7 @@ let%expect_test "turn 2" =
   [%expect {|
     (Turn
      ((rid 24) (deadline_ms 10000)
-      (game ((id g_gy1re6kx9g23) (index 1) (total 1) (first you)))
+      (game ((id g_gy1re6kx9g23) (index 1) (total 1) (first (you))))
       (you
        ((Empty Empty Empty Empty Empty Empty Empty Empty S S)
         (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)

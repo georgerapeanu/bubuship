@@ -68,7 +68,7 @@ module V1 = struct
       { id : string
       ; index : int
       ; total : int
-      ; first : string
+      ; first : string option [@default None]
       }
     [@@deriving jsonaf, sexp]
   end

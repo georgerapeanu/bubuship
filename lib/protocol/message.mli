@@ -53,7 +53,7 @@ module Game : sig
     { id : string
     ; index : int
     ; total : int
-    ; first : string
+    ; first : string option
     }
   [@@deriving sexp]
 end
