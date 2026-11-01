@@ -58,7 +58,7 @@ module Game : sig
   [@@deriving sexp]
 end
 
-module Hello : sig
+module Hello_record : sig
   type t =
     { token : string
     ; lobby : string
@@ -69,7 +69,7 @@ module Hello : sig
   [@@deriving sexp]
 end
 
-module Welcome : sig
+module Welcome_record : sig
   type t =
     { session_id : string
     ; seat : int
@@ -81,7 +81,7 @@ module Welcome : sig
   [@@deriving sexp]
 end
 
-module Place : sig
+module Place_record : sig
   type t =
     { rid : int
     ; deadline_ms : int
@@ -110,7 +110,7 @@ module Ship_placement : sig
   [@@deriving sexp]
 end
 
-module Placement : sig
+module Placement_record : sig
   type t =
     { rid : int
     ; ships : Ship_placement.t list
@@ -126,7 +126,7 @@ module Board : sig
         | Hit
         | Miss
         | Empty
-      [@@deriving sexp]
+      [@@deriving equal, sexp]
     end
 
     type t = Cell_state.t array array
@@ -139,9 +139,10 @@ module Board : sig
     module Cell_state : sig
       type t =
         | Hit
+        | Sunk
         | Miss
         | Empty
-      [@@deriving sexp]
+      [@@deriving equal, sexp]
     end
 
     type t = Cell_state.t array array
@@ -168,7 +169,7 @@ module Shot : sig
   [@@deriving sexp]
 end
 
-module Turn : sig
+module Turn_record : sig
   type t =
     { rid : int
     ; deadline_ms : int
@@ -176,7 +177,7 @@ module Turn : sig
     ; you : Board.Self.t
     ; opponent : Board.Opponent.t
     ; opponent_remaining : int list
-    ; last_shot : Shot.t
+    ; last_shot : Shot.t option
     ; incoming : Shot.t list
     ; error : Jsonaf.t option
     ; strikes : int
@@ -184,7 +185,7 @@ module Turn : sig
   [@@deriving sexp]
 end
 
-module Fire : sig
+module Fire_record : sig
   type t =
     { rid : int
     ; x : int
@@ -193,12 +194,12 @@ module Fire : sig
   [@@deriving sexp]
 end
 
-module Game_over : sig
+module Game_over_record : sig
   type t =
     { game : Game.t
     ; winner : string
     ; reason : string
-    ; last_shot : Shot.t
+    ; last_shot : Shot.t option
     ; incoming : Shot.t list
     ; series : Jsonaf.t
     ; reveal : Jsonaf.t
@@ -206,11 +207,11 @@ module Game_over : sig
   [@@deriving sexp]
 end
 
-module Reset : sig
+module Reset_record : sig
   type t = { reason : string } [@@deriving sexp]
 end
 
-module Error : sig
+module Error_record : sig
   type t =
     { code : string
     ; message : string
@@ -220,13 +221,13 @@ module Error : sig
 end
 
 type t =
-  | Hello of Hello.t
-  | Welcome of Welcome.t
-  | Place of Place.t
-  | Placement of Placement.t
-  | Turn of Turn.t
-  | Fire of Fire.t
-  | Game_over of Game_over.t
-  | Reset of Reset.t
-  | Error of Error.t
+  | Hello of Hello_record.t
+  | Welcome of Welcome_record.t
+  | Place of Place_record.t
+  | Placement of Placement_record.t
+  | Turn of Turn_record.t
+  | Fire of Fire_record.t
+  | Game_over of Game_over_record.t
+  | Reset of Reset_record.t
+  | Error of Error_record.t
 [@@deriving jsonaf, sexp]

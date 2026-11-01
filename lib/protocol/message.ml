@@ -58,7 +58,7 @@ module V1 = struct
   module Opponent = struct
     type t =
       { name : string
-      ; program : Program.t option [@jsonaf.option]
+      ; program : Program.t option [@default None]
       }
     [@@deriving jsonaf, sexp]
   end
@@ -73,7 +73,7 @@ module V1 = struct
     [@@deriving jsonaf, sexp]
   end
 
-  module Hello = struct
+  module Hello_record = struct
     type t =
       { token : string
       ; lobby : string
@@ -84,7 +84,7 @@ module V1 = struct
     [@@deriving jsonaf, sexp]
   end
 
-  module Welcome = struct
+  module Welcome_record = struct
     type t =
       { session_id : string
       ; seat : int
@@ -96,14 +96,14 @@ module V1 = struct
     [@@deriving jsonaf, sexp]
   end
 
-  module Place = struct
+  module Place_record = struct
     type t =
       { rid : int
       ; deadline_ms : int
       ; game : Game.t
       ; opponent : Opponent.t
       ; strikes : int
-      ; error : Jsonaf.t option [@jsonaf.option]
+      ; error : Jsonaf.t option [@default None]
       }
     [@@deriving jsonaf, sexp]
   end
@@ -123,7 +123,7 @@ module V1 = struct
 
     let jsonaf_of_t = function
       | H -> `String "h"
-      | V -> `String "v\n"
+      | V -> `String "v"
     ;;
   end
 
@@ -137,7 +137,7 @@ module V1 = struct
     [@@deriving jsonaf, sexp]
   end
 
-  module Placement = struct
+  module Placement_record = struct
     type t =
       { rid : int
       ; ships : Ship_placement.t list
@@ -181,7 +181,7 @@ module V1 = struct
           | Hit
           | Miss
           | Empty
-        [@@deriving sexp]
+        [@@deriving equal, sexp]
 
         let of_string = function
           | "S" -> S
@@ -217,32 +217,37 @@ module V1 = struct
       module Opponent = struct
         type t =
           | Hit
+          | Sunk
           | Miss
           | Empty
-        [@@deriving sexp]
+        [@@deriving equal, sexp]
 
         let of_string = function
           | "x" -> Hit
+          | "#" -> Sunk
           | "o" -> Miss
           | "." -> Empty
-          | _ -> failwith "Unexpected self board entry"
+          | _ -> failwith "Unexpected opponent board entry"
         ;;
 
         let to_string = function
           | Hit -> "x"
+          | Sunk -> "#"
           | Miss -> "o"
           | Empty -> "."
         ;;
 
         let t_of_jsonaf = function
           | `String "x" -> Hit
+          | `String "#" -> Sunk
           | `String "o" -> Miss
           | `String "." -> Empty
-          | _ -> failwith "Unexpected self board entry"
+          | _ -> failwith "Unexpected opponent board entry"
         ;;
 
         let jsonaf_of_t = function
           | Hit -> `String "x"
+          | Sunk -> `String "#"
           | Miss -> `String "o"
           | Empty -> `String "."
         ;;
@@ -274,7 +279,7 @@ module V1 = struct
         { x : int
         ; y : int
         ; result : string
-        ; len : int option [@jsonaf.option]
+        ; len : int option [@default None]
         }
       [@@deriving jsonaf, sexp]
     end
@@ -311,7 +316,7 @@ module V1 = struct
     let jsonaf_of_t t = format_of_t t |> Format.jsonaf_of_t
   end
 
-  module Turn = struct
+  module Turn_record = struct
     type t =
       { rid : int
       ; deadline_ms : int
@@ -319,7 +324,7 @@ module V1 = struct
       ; you : Board.Self.t
       ; opponent : Board.Opponent.t [@key "enemy"]
       ; opponent_remaining : int list [@key "enemy_remaining"]
-      ; last_shot : Shot.t
+      ; last_shot : Shot.t option [@default None]
       ; incoming : Shot.t list
       ; error : Jsonaf.t option
       ; strikes : int
@@ -327,7 +332,7 @@ module V1 = struct
     [@@deriving jsonaf, sexp]
   end
 
-  module Fire = struct
+  module Fire_record = struct
     type t =
       { rid : int
       ; x : int
@@ -336,12 +341,12 @@ module V1 = struct
     [@@deriving jsonaf, sexp]
   end
 
-  module Game_over = struct
+  module Game_over_record = struct
     type t =
       { game : Game.t
       ; winner : string
       ; reason : string
-      ; last_shot : Shot.t
+      ; last_shot : Shot.t option [@default None]
       ; incoming : Shot.t list
       ; series : Jsonaf.t
       ; reveal : Jsonaf.t
@@ -349,11 +354,11 @@ module V1 = struct
     [@@deriving jsonaf, sexp]
   end
 
-  module Reset = struct
+  module Reset_record = struct
     type t = { reason : string } [@@deriving jsonaf, sexp]
   end
 
-  module Error = struct
+  module Error_record = struct
     type t =
       { code : string
       ; message : string
@@ -393,42 +398,43 @@ module V1 = struct
   end
 
   type t =
-    | Hello of Hello.t
-    | Welcome of Welcome.t
-    | Place of Place.t
-    | Placement of Placement.t
-    | Turn of Turn.t
-    | Fire of Fire.t
-    | Game_over of Game_over.t
-    | Reset of Reset.t
-    | Error of Error.t
+    | Hello of Hello_record.t
+    | Welcome of Welcome_record.t
+    | Place of Place_record.t
+    | Placement of Placement_record.t
+    | Turn of Turn_record.t
+    | Fire of Fire_record.t
+    | Game_over of Game_over_record.t
+    | Reset of Reset_record.t
+    | Error of Error_record.t
   [@@deriving sexp]
 
   let format_of_t = function
-    | Hello hello -> { Format.type_ = "hello"; body = Hello.jsonaf_of_t hello }
-    | Welcome welcome -> { Format.type_ = "welcome"; body = Welcome.jsonaf_of_t welcome }
-    | Place place -> { Format.type_ = "place"; body = Place.jsonaf_of_t place }
+    | Hello hello -> { Format.type_ = "hello"; body = Hello_record.jsonaf_of_t hello }
+    | Welcome welcome ->
+      { Format.type_ = "welcome"; body = Welcome_record.jsonaf_of_t welcome }
+    | Place place -> { Format.type_ = "place"; body = Place_record.jsonaf_of_t place }
     | Placement placement ->
-      { Format.type_ = "placement"; body = Placement.jsonaf_of_t placement }
-    | Turn turn -> { Format.type_ = "turn"; body = Turn.jsonaf_of_t turn }
-    | Fire fire -> { Format.type_ = "fire"; body = Fire.jsonaf_of_t fire }
+      { Format.type_ = "placement"; body = Placement_record.jsonaf_of_t placement }
+    | Turn turn -> { Format.type_ = "turn"; body = Turn_record.jsonaf_of_t turn }
+    | Fire fire -> { Format.type_ = "fire"; body = Fire_record.jsonaf_of_t fire }
     | Game_over game_over ->
-      { Format.type_ = "game_over"; body = Game_over.jsonaf_of_t game_over }
-    | Reset reset -> { Format.type_ = "reset"; body = Reset.jsonaf_of_t reset }
-    | Error error -> { Format.type_ = "error"; body = Error.jsonaf_of_t error }
+      { Format.type_ = "game_over"; body = Game_over_record.jsonaf_of_t game_over }
+    | Reset reset -> { Format.type_ = "reset"; body = Reset_record.jsonaf_of_t reset }
+    | Error error -> { Format.type_ = "error"; body = Error_record.jsonaf_of_t error }
   ;;
 
   let t_of_format { Format.type_; body } =
     match type_ with
-    | "hello" -> Hello (Hello.t_of_jsonaf body)
-    | "welcome" -> Welcome (Welcome.t_of_jsonaf body)
-    | "place" -> Place (Place.t_of_jsonaf body)
-    | "placement" -> Placement (Placement.t_of_jsonaf body)
-    | "turn" -> Turn (Turn.t_of_jsonaf body)
-    | "fire" -> Fire (Fire.t_of_jsonaf body)
-    | "game_over" -> Game_over (Game_over.t_of_jsonaf body)
-    | "reset" -> Reset (Reset.t_of_jsonaf body)
-    | "error" -> Error (Error.t_of_jsonaf body)
+    | "hello" -> Hello (Hello_record.t_of_jsonaf body)
+    | "welcome" -> Welcome (Welcome_record.t_of_jsonaf body)
+    | "place" -> Place (Place_record.t_of_jsonaf body)
+    | "placement" -> Placement (Placement_record.t_of_jsonaf body)
+    | "turn" -> Turn (Turn_record.t_of_jsonaf body)
+    | "fire" -> Fire (Fire_record.t_of_jsonaf body)
+    | "game_over" -> Game_over (Game_over_record.t_of_jsonaf body)
+    | "reset" -> Reset (Reset_record.t_of_jsonaf body)
+    | "error" -> Error (Error_record.t_of_jsonaf body)
     | _ -> failwith "Unexpected format"
   ;;
 

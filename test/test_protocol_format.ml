@@ -139,7 +139,7 @@ let%expect_test "place" =
      ((rid 1) (deadline_ms 10000)
       (game ((id g_8f3a) (index 1) (total 100) (first you)))
       (opponent ((name Alex) (program (((name x) (version 1)))))) (strikes 0)
-      (error (Null))))
+      (error ())))
     |}];
   generate_json message;
   [%expect
@@ -276,7 +276,7 @@ let%expect_test "turn" =
         (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
         (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
         (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)))
-      (opponent_remaining (5 4 3 2)) (last_shot ((x 3) (y 4) (result Hit)))
+      (opponent_remaining (5 4 3 2)) (last_shot (((x 3) (y 4) (result Hit))))
       (incoming (((x 1) (y 1) (result Miss)))) (error ()) (strikes 0)))
     |}];
   generate_json message;
@@ -325,13 +325,15 @@ let%expect_test "turn" =
       "last_shot": {
         "x": 3,
         "y": 4,
-        "result": "hit"
+        "result": "hit",
+        "len": null
       },
       "incoming": [
         {
           "x": 1,
           "y": 1,
-          "result": "miss"
+          "result": "miss",
+          "len": null
         }
       ],
       "error": null,
@@ -383,7 +385,7 @@ let%expect_test "game_over" =
     {|
     (Game_over
      ((game ((id g_8f3a) (index 1) (total 100) (first you))) (winner you)
-      (reason sunk) (last_shot ((x 6) (y 6) (result (Sunk 2)))) (incoming ())
+      (reason sunk) (last_shot (((x 6) (y 6) (result (Sunk 2))))) (incoming ())
       (series
        (Object
         ((score (Object ((you (Number 1)) (opponent (Number 0))))) (done False))))
@@ -479,6 +481,93 @@ let%expect_test "error" =
       "code": "bad_json",
       "message": "human readable",
       "fatal": false
+    }
+    |}]
+;;
+
+let%expect_test "turn 2" =
+  let message =
+    parse_json
+      {|
+      {"type":"turn","rid":24,"deadline_ms":10000,"game":{"id":"g_gy1re6kx9g23","index":1,"total":1,"first":"you"},"you":["........SS","..........","..SSSSS...","..........","..........","..SSS.....","S.........","S...S.....","S...S.....","S...S....."],"enemy":["..........","..........","..........","..........","..........","..........","..........","..........","..........",".........."],"enemy_remaining":[5,4,3,3,2],"last_shot":null,"incoming":[],"error":null,"strikes":0}
+    |}
+  in
+  [%expect {|
+    (Turn
+     ((rid 24) (deadline_ms 10000)
+      (game ((id g_gy1re6kx9g23) (index 1) (total 1) (first you)))
+      (you
+       ((Empty Empty Empty Empty Empty Empty Empty Empty S S)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty S S S S S Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty S S S Empty Empty Empty Empty Empty)
+        (S Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (S Empty Empty Empty S Empty Empty Empty Empty Empty)
+        (S Empty Empty Empty S Empty Empty Empty Empty Empty)
+        (S Empty Empty Empty S Empty Empty Empty Empty Empty)))
+      (opponent
+       ((Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)
+        (Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty)))
+      (opponent_remaining (5 4 3 3 2)) (last_shot ()) (incoming ()) (error ())
+      (strikes 0)))
+    |}];
+  generate_json message;
+  [%expect {|
+    {
+      "type": "turn",
+      "rid": 24,
+      "deadline_ms": 10000,
+      "game": {
+        "id": "g_gy1re6kx9g23",
+        "index": 1,
+        "total": 1,
+        "first": "you"
+      },
+      "you": [
+        "........SS",
+        "..........",
+        "..SSSSS...",
+        "..........",
+        "..........",
+        "..SSS.....",
+        "S.........",
+        "S...S.....",
+        "S...S.....",
+        "S...S....."
+      ],
+      "enemy": [
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        ".........."
+      ],
+      "enemy_remaining": [
+        5,
+        4,
+        3,
+        3,
+        2
+      ],
+      "last_shot": null,
+      "incoming": [],
+      "error": null,
+      "strikes": 0
     }
     |}]
 ;;

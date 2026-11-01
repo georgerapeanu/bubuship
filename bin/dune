@@ -1,7 +1,7 @@
 (executable
  (name main)
  (public_name bubuship)
- (libraries async async_websocket bubuship_protocol core jsonaf)
+ (libraries async async_websocket bubuship_protocol bubuship_strategy core jsonaf)
  (preprocess
   (pps ppx_jane ppx_jsonaf_conv)))
 
