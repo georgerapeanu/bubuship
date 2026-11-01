@@ -1,4 +1,4 @@
 include struct
-  open Bubuship.Protocol.For_testing
+  open Bubuship_protocol
   module Message = Message
 end
