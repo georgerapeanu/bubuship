@@ -1,0 +1,4 @@
+(executable
+ (public_name bubuship)
+ (name main)
+ (libraries async core bubuship))
