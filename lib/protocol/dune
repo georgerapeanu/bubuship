@@ -1,5 +1,5 @@
 (library
  (name bubuship_protocol)
-  (libraries async cohttp_async_websocket core jsonaf)
-  (preprocess (pps ppx_jane ppx_jsonaf_conv))
-)
+ (libraries async cohttp_async_websocket core jsonaf)
+ (preprocess
+  (pps ppx_jane ppx_jsonaf_conv)))

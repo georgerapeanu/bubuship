@@ -2,10 +2,9 @@
  (name main)
  (public_name bubuship)
  (libraries async async_websocket bubuship_protocol core jsonaf)
- (preprocess (pps ppx_jane ppx_jsonaf_conv))
-)
+ (preprocess
+  (pps ppx_jane ppx_jsonaf_conv)))
 
 (alias
  (name executables)
- (deps main.exe)
-)
+ (deps main.exe))

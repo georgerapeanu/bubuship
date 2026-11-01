@@ -2,5 +2,5 @@
  (name test_bubuship)
  (inline_tests)
  (libraries async bubuship bubuship_protocol core)
- (preprocess (pps ppx_inline_test ppx_jane ppx_jsonaf_conv))
-)
+ (preprocess
+  (pps ppx_inline_test ppx_jane ppx_jsonaf_conv)))
